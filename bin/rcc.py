@@ -6,7 +6,7 @@ import wget
 
 from roys_ciclisimo import secrets
 from roys_ciclisimo.config import config
-from roys_ciclisimo.db import save_image, get_image_ids
+from roys_ciclisimo.models import save_image, get_image_ids
 
 logger = logging.getLogger(__name__)
 
@@ -38,14 +38,14 @@ def _get_metadata(hashtag):
 
 
 def get_media(hashtag):
-    cur_images = get_image_ids()
+    ids = get_image_ids()
 
     for res in _get_metadata(hashtag):
         if res['meta']['code'] != 200:
             continue
 
         for media in res['data']:
-            if media['id'] in cur_images:
+            if media['id'] in ids:
                 logger.info('%s already saved' % media['id'])
                 continue
 

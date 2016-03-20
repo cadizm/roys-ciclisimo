@@ -37,7 +37,7 @@ def save_image(id_, path, caption):
 
 def get_image_ids():
     conn = engine.connect()
-    res = [r for r in
+    res = [r[0] for r in
         conn.execute('select id from images')]
     conn.close()
 

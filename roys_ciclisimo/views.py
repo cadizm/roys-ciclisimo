@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask import render_template
 
-from roys_ciclisimo.db import get_images
+from roys_ciclisimo.models import get_images
 
 
 def index():
