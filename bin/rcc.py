@@ -1,9 +1,14 @@
+import logging
 import shutil
 
 import requests
 import wget
 
-from roys_ciclisimo import config, secrets
+from roys_ciclisimo import secrets
+from roys_ciclisimo.config import config
+from roys_ciclisimo.db import save_image, get_image_ids
+
+logger = logging.getLogger(__name__)
 
 
 def _hashtag_url(hashtag):
@@ -32,27 +37,33 @@ def _get_metadata(hashtag):
             break
 
 
-# TODO:
-#   - skip downloading media that has already been downloaded
-#   - save image metadata and path on disk to sqlite?
 def get_media(hashtag):
+    cur_images = get_image_ids()
+
     for res in _get_metadata(hashtag):
         if res['meta']['code'] != 200:
             continue
 
         for media in res['data']:
+            if media['id'] in cur_images:
+                logger.info('%s already saved' % media['id'])
+                continue
+
             caption = media.get('caption', {})
             caption = caption.get('text', '')
 
             for resolution, image in media['images'].iteritems():
-                try:
-                    filename = wget.download(image['url'])
-                    dest = '%s/images/%s' % (config['static_dir'], resolution)
-                    shutil.move(filename, dest)
+                if resolution == 'standard_resolution':
+                    try:
+                        logger.info('downloading %s' % image['url'])
+                        filename = wget.download(image['url'])
+                        dest = '%s/images/%s' % (config['static_dir'], resolution)
+                        shutil.move(filename, dest)
+                        save_image(media['id'], filename, caption)
 
-                except shutil.Error:
-                    import os
-                    os.remove(filename)
+                    except shutil.Error:
+                        import os
+                        os.remove(filename)
 
 
 if __name__ == '__main__':

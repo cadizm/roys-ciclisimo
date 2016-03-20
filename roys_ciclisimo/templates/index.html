@@ -26,7 +26,7 @@
     <div class="pure-g-r">
         {% for image in images %}
             <div class="pure-u-1-3 photo-box">
-                <img src="{{ image.standard_resolution }}">
+                <img src="{{ url_for('static', filename='images/standard_resolution/%s' % image.standard_resolution) }}">
                 <aside class="photo-box-caption">{{ image.caption }}</aside>
             </div>
         {% endfor %}
